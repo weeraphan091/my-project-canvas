@@ -12,17 +12,16 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
-    <!-- 3. Load Dependencies for Recharts (Prop-Types is often needed for UMD builds) -->
+    <!-- 3. Load Dependencies for Recharts -->
     <script src="https://unpkg.com/prop-types/prop-types.min.js"></script>
 
-    <!-- 4. Load Recharts (Pinned to stable version 2.10.3 for UMD compatibility) -->
+    <!-- 4. Load Recharts -->
     <script src="https://unpkg.com/recharts@2.10.3/umd/Recharts.js"></script>
     
     <!-- 5. Load Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
-        /* Custom Scrollbar for Tables */
         .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -40,6 +39,12 @@
         body {
             font-family: 'Sarabun', sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
         }
+        /* Remove arrows from number input */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
@@ -54,7 +59,7 @@
             Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell 
         } = Recharts;
 
-        // --- Icons (Inline SVGs to avoid dependency issues) ---
+        // --- Icons ---
         const IconActivity = ({ className, size = 24 }) => (
             <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
         );
@@ -82,45 +87,43 @@
         const IconBuilding2 = ({ className, size = 24 }) => (
             <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>
         );
+        const IconSettings = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.74v-.47a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        );
 
         // --- Main Component ---
         const FinancialDashboard = () => {
             // --- 1. State Configuration ---
             const [inputs, setInputs] = useState({
-                // Revenue Drivers - Sales
+                // Revenue Drivers
                 avgHousePrice: 7000000,       
                 salesVolume: 3,               
                 salesCommRate: 5,             
-                
-                // Revenue Drivers - Rentals
                 rentalVolume: 7,              
                 avgRentalPrice: 50000,        
                 rentalCommMonths: 1,          
 
-                // Operational Costs
+                // Costs
                 marketingBudget: 100000,      
                 officeRent: 35000,            
                 softwareCost: 10000,          
 
-                // Staff Salaries
-                salaryManager: 30000,
-                salarySales: 36000,    
-                salaryAdmin: 15000,
-                salaryListing: 15000,
-                salaryContent: 15000,
+                // Salaries (Rate per person & Count)
+                salaryManagerRate: 30000, salaryManagerCount: 1,
+                salarySalesRate: 18000,   salarySalesCount: 2,
+                salaryAdminRate: 15000,   salaryAdminCount: 1,
+                salaryListingRate: 15000, salaryListingCount: 1,
+                salaryContentRate: 15000, salaryContentCount: 1,
 
-                // Commission Sharing Rules
+                // Commission Sharing (% of Net Revenue)
                 shareSales: 30,
                 shareListing: 2.5,
                 shareAdmin: 2.5,
-                shareCompany: 65,             
                 
                 initialCapital: 2000000       
             });
 
             const [results, setResults] = useState({
-                salesGross: 0,
-                rentalGross: 0,
                 totalGross: 0,
                 vatAmount: 0,
                 netRevenue: 0,
@@ -128,15 +131,16 @@
                 distListing: 0,
                 distAdmin: 0,
                 distCompany: 0,
-                totalSalaries: 0,
+                companySharePercent: 0,
                 totalExpenses: 0,
-                monthlyEBT: 0,
-                annualEBT: 0,
-                taxDetails: [],
-                totalTax: 0,
                 annualNetProfit: 0,
                 roi: 0,
-                breakEvenPoint: 0
+                breakEvenPoint: 0,
+                taxDetails: [],
+                totalTax: 0,
+                monthlyEBT: 0,
+                annualEBT: 0,
+                totalSalaries: 0
             });
 
             const [cashFlowData, setCashFlowData] = useState([]);
@@ -144,13 +148,12 @@
 
             // --- 2. Calculation Logic ---
             useEffect(() => {
-                // A. Revenue Calculations
+                // A. Revenue
                 const salesGross = inputs.avgHousePrice * inputs.salesVolume * (inputs.salesCommRate / 100);
                 const rentalGross = inputs.avgRentalPrice * inputs.rentalVolume * inputs.rentalCommMonths;
                 const totalGross = salesGross + rentalGross;
 
-                // VAT Logic (Gross is 107%, Net is 100%)
-                // Net Revenue = Total Gross / 1.07
+                // VAT Logic
                 const netRevenue = totalGross / 1.07;
                 const vatAmount = totalGross - netRevenue;
 
@@ -158,89 +161,73 @@
                 const distSales = netRevenue * (inputs.shareSales / 100);
                 const distListing = netRevenue * (inputs.shareListing / 100);
                 const distAdmin = netRevenue * (inputs.shareAdmin / 100);
-                const distCompany = netRevenue * (inputs.shareCompany / 100);
+                const companySharePercent = 100 - inputs.shareSales - inputs.shareListing - inputs.shareAdmin;
+                const distCompany = netRevenue * (companySharePercent / 100);
 
-                // C. Expense Calculations
-                const totalSalaries = inputs.salaryManager + inputs.salarySales + inputs.salaryAdmin + inputs.salaryListing + inputs.salaryContent;
+                // C. Expenses (Updated for multiple staff)
+                const totalSalaries = 
+                    (inputs.salaryManagerRate * inputs.salaryManagerCount) +
+                    (inputs.salarySalesRate * inputs.salarySalesCount) +
+                    (inputs.salaryAdminRate * inputs.salaryAdminCount) +
+                    (inputs.salaryListingRate * inputs.salaryListingCount) +
+                    (inputs.salaryContentRate * inputs.salaryContentCount);
+
                 const fixedCosts = totalSalaries + inputs.officeRent + inputs.softwareCost;
                 const totalExpenses = fixedCosts + inputs.marketingBudget;
 
-                // D. Profit Calculations
+                // D. Profit
                 const monthlyEBT = distCompany - totalExpenses;
-
-                // E. Annual Projections
                 const annualEBT = monthlyEBT * 12;
 
-                // F. Thai SME Tax Calculation
+                // E. Tax
                 let tax = 0;
                 let taxDetails = [];
-                
-                let tier1Base = Math.min(annualEBT, 300000);
-                if (tier1Base < 0) tier1Base = 0;
+                let tier1Base = Math.min(annualEBT, 300000); if(tier1Base<0) tier1Base=0;
                 taxDetails.push({ tier: '0 - 300,000', rate: '0%', base: tier1Base, tax: 0 });
 
-                let tier2Base = 0;
-                let tier2Tax = 0;
+                let tier2Base = 0, tier2Tax = 0;
                 if (annualEBT > 300000) {
                     tier2Base = Math.min(annualEBT - 300000, 2700000);
                     tier2Tax = tier2Base * 0.15;
                 }
                 taxDetails.push({ tier: '300,001 - 3M', rate: '15%', base: tier2Base, tax: tier2Tax });
 
-                let tier3Base = 0;
-                let tier3Tax = 0;
+                let tier3Base = 0, tier3Tax = 0;
                 if (annualEBT > 3000000) {
                     tier3Base = annualEBT - 3000000;
                     tier3Tax = tier3Base * 0.20;
                 }
                 taxDetails.push({ tier: '> 3,000,000', rate: '20%', base: tier3Base, tax: tier3Tax });
-
                 tax = tier2Tax + tier3Tax;
 
                 const annualNetProfit = annualEBT - tax;
                 const roi = (annualNetProfit / inputs.initialCapital) * 100;
 
-                // G. Break-Even Analysis (Revenue needed to cover expenses)
-                const breakEvenRevenue = (totalExpenses / (inputs.shareCompany / 100)) * 1.07;
+                // F. Break Even
+                let breakEvenRevenue = 0;
+                if (companySharePercent > 0) {
+                    breakEvenRevenue = (totalExpenses / (companySharePercent / 100)) * 1.07;
+                }
 
                 setResults({
-                    salesGross,
-                    rentalGross,
-                    totalGross,
-                    vatAmount,
-                    netRevenue,
-                    distSales,
-                    distListing,
-                    distAdmin,
-                    distCompany,
-                    totalSalaries,
-                    totalExpenses,
-                    monthlyEBT,
-                    annualEBT,
-                    taxDetails,
-                    totalTax: tax,
-                    annualNetProfit,
-                    roi,
-                    breakEvenPoint: breakEvenRevenue
+                    totalGross, vatAmount, netRevenue,
+                    distSales, distListing, distAdmin, distCompany, companySharePercent,
+                    totalExpenses, annualNetProfit, roi, breakEvenPoint: breakEvenRevenue,
+                    taxDetails, totalTax: tax, monthlyEBT, annualEBT, totalSalaries
                 });
 
-                // H. Generate Cash Flow Data
+                // Cash Flow Data
                 const cfData = [];
-                let currentCash = inputs.initialCapital - 350000; // Setup cost deduction
-                
+                let currentCash = inputs.initialCapital - 350000; 
                 for (let i = 1; i <= 12; i++) {
-                    const flow = monthlyEBT;
-                    currentCash += flow;
-                    let monthlyTax = 0;
-                    if (i === 12) {
-                        currentCash -= tax;
-                        monthlyTax = tax;
-                    }
+                    currentCash += monthlyEBT;
+                    let monthlyTax = (i === 12) ? tax : 0;
+                    if (i === 12) currentCash -= tax;
                     cfData.push({
                         month: i,
                         revenue: distCompany,
                         expenses: totalExpenses,
-                        net: flow,
+                        net: monthlyEBT,
                         tax: monthlyTax,
                         cumulative: currentCash
                     });
@@ -270,6 +257,15 @@
             const COLORS = {
                 chart: ['#0f172a', '#d97706', '#64748b', '#cbd5e1']
             };
+
+            // Staff Roles Configuration
+            const staffRoles = [
+                { id: 'Manager', label: 'ผู้จัดการ', rateKey: 'salaryManagerRate', countKey: 'salaryManagerCount' },
+                { id: 'Sales', label: 'ทีมขาย', rateKey: 'salarySalesRate', countKey: 'salarySalesCount' },
+                { id: 'Admin', label: 'แอดมิน', rateKey: 'salaryAdminRate', countKey: 'salaryAdminCount' },
+                { id: 'Listing', label: 'Listing', rateKey: 'salaryListingRate', countKey: 'salaryListingCount' },
+                { id: 'Content', label: 'Content', rateKey: 'salaryContentRate', countKey: 'salaryContentCount' },
+            ];
 
             return (
                 <div className="bg-slate-50 min-h-screen font-sans text-slate-800 pb-10">
@@ -313,7 +309,7 @@
                         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                             <div className="bg-slate-50 px-5 py-3 border-b border-slate-100 flex items-center gap-2">
                                 <IconHome size={16} className="text-amber-600" />
-                                <h3 className="font-bold text-slate-700 text-sm">ตัวขับเคลื่อนรายได้ (Revenue)</h3>
+                                <h3 className="font-bold text-slate-700 text-sm">รายได้ (Revenue)</h3>
                             </div>
                             
                             <div className="p-5 space-y-6">
@@ -371,37 +367,94 @@
                             </div>
                         </div>
 
-                        {/* 2. Staff & Costs */}
+                        {/* 2. Staff & Costs (UPDATED) */}
                         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                             <div className="bg-slate-50 px-5 py-3 border-b border-slate-100 flex items-center gap-2">
                                 <IconUsers size={16} className="text-slate-600" />
                                 <h3 className="font-bold text-slate-700 text-sm">ต้นทุน (Costs & Salaries)</h3>
                             </div>
-                            <div className="p-5 space-y-3">
-                                {[
-                                    { label: 'ผู้จัดการ (Manager)', name: 'salaryManager' },
-                                    { label: 'ทีมขาย (Sales Base)', name: 'salarySales' },
-                                    { label: 'แอดมิน (Admin)', name: 'salaryAdmin' },
-                                    { label: 'ดูแลระบบ (Listing)', name: 'salaryListing' },
-                                    { label: 'คอนเทนต์ (Content)', name: 'salaryContent' },
-                                ].map((role) => (
-                                    <div key={role.name} className="flex justify-between items-center group">
-                                        <label className="text-xs text-slate-500 group-hover:text-slate-800 transition-colors">{role.label}</label>
-                                        <input 
-                                            type="number" name={role.name} value={inputs[role.name]} onChange={handleInputChange}
-                                            className="w-24 bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs text-right focus:bg-white focus:ring-1 focus:ring-slate-400 outline-none"
-                                        />
+                            <div className="p-4 space-y-3">
+                                <div className="grid grid-cols-12 gap-2 text-[10px] text-slate-400 font-medium text-center pb-1 border-b border-slate-100">
+                                    <div className="col-span-4 text-left pl-1">ตำแหน่ง</div>
+                                    <div className="col-span-3">เงิน/คน</div>
+                                    <div className="col-span-2">คน</div>
+                                    <div className="col-span-3 text-right pr-1">รวม</div>
+                                </div>
+                                
+                                {staffRoles.map((role) => (
+                                    <div key={role.id} className="grid grid-cols-12 gap-2 items-center">
+                                        <div className="col-span-4 text-xs font-medium text-slate-600">{role.label}</div>
+                                        <div className="col-span-3">
+                                            <input 
+                                                type="number" name={role.rateKey} value={inputs[role.rateKey]} onChange={handleInputChange}
+                                                className="w-full bg-slate-50 border border-slate-200 rounded px-1 py-1 text-xs text-center focus:bg-white outline-none"
+                                            />
+                                        </div>
+                                        <div className="col-span-2">
+                                            <input 
+                                                type="number" name={role.countKey} value={inputs[role.countKey]} onChange={handleInputChange}
+                                                className="w-full bg-slate-50 border border-slate-200 rounded px-1 py-1 text-xs text-center focus:bg-white outline-none"
+                                            />
+                                        </div>
+                                        <div className="col-span-3 text-xs text-right font-bold text-slate-700">
+                                            {formatCurrency(inputs[role.rateKey] * inputs[role.countKey])}
+                                        </div>
                                     </div>
                                 ))}
+
                                 <div className="h-px bg-slate-100 my-2"></div>
-                                <div className="flex justify-between items-center">
-                                    <label className="text-xs font-semibold text-rose-600">งบการตลาด (Ads)</label>
+                                <div className="flex justify-between items-center px-1">
+                                    <label className="text-xs font-semibold text-rose-600">งบการตลาด</label>
                                     <input type="number" name="marketingBudget" value={inputs.marketingBudget} onChange={handleInputChange} className="w-24 border border-rose-200 bg-rose-50 rounded px-2 py-1 text-xs text-right font-semibold text-rose-700 focus:ring-1 focus:ring-rose-400 outline-none" />
                                 </div>
-                                <div className="flex justify-between items-center">
+                                <div className="flex justify-between items-center px-1">
                                     <label className="text-xs text-slate-600">ค่าเช่า/Ops</label>
                                     <input type="number" name="officeRent" value={inputs.officeRent} onChange={handleInputChange} className="w-24 border border-slate-200 bg-slate-50 rounded px-2 py-1 text-xs text-right focus:bg-white focus:ring-1 focus:ring-slate-400 outline-none" />
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* 3. Commission Structure Settings */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                            <div className="bg-slate-50 px-5 py-3 border-b border-slate-100 flex items-center gap-2">
+                                <IconSettings size={16} className="text-slate-600" />
+                                <h3 className="font-bold text-slate-700 text-sm">ปรับสัดส่วนค่าคอมฯ (%)</h3>
+                            </div>
+                            <div className="p-5 space-y-3">
+                                <div className="flex justify-between items-center">
+                                    <label className="text-xs text-amber-700 font-medium">ทีมขาย (Sales)</label>
+                                    <div className="flex items-center gap-1">
+                                        <input type="number" name="shareSales" value={inputs.shareSales} onChange={handleInputChange} className="w-14 border border-amber-200 bg-amber-50 rounded px-1 py-1 text-xs text-center font-bold text-amber-800" />
+                                        <span className="text-xs text-slate-400">%</span>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <label className="text-xs text-slate-600">Listing</label>
+                                    <div className="flex items-center gap-1">
+                                        <input type="number" name="shareListing" value={inputs.shareListing} onChange={handleInputChange} className="w-14 border border-slate-200 bg-slate-50 rounded px-1 py-1 text-xs text-center" />
+                                        <span className="text-xs text-slate-400">%</span>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <label className="text-xs text-slate-600">Admin</label>
+                                    <div className="flex items-center gap-1">
+                                        <input type="number" name="shareAdmin" value={inputs.shareAdmin} onChange={handleInputChange} className="w-14 border border-slate-200 bg-slate-50 rounded px-1 py-1 text-xs text-center" />
+                                        <span className="text-xs text-slate-400">%</span>
+                                    </div>
+                                </div>
+                                <div className="h-px bg-slate-100 my-2"></div>
+                                <div className="flex justify-between items-center">
+                                    <label className="text-xs font-bold text-slate-800">บริษัท (Auto)</label>
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-14 bg-slate-100 border border-slate-200 rounded px-1 py-1 text-xs text-center font-bold text-slate-700">
+                                            {results.companySharePercent.toFixed(1)}
+                                        </div>
+                                        <span className="text-xs text-slate-400">%</span>
+                                    </div>
+                                </div>
+                                {results.companySharePercent < 0 && (
+                                    <p className="text-[10px] text-red-500 text-right mt-1">สัดส่วนเกิน 100%!</p>
+                                )}
                             </div>
                         </div>
 
@@ -428,7 +481,7 @@
                                     <div className="relative">
                                         <div className="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-slate-300 ring-4 ring-white"></div>
                                         <div className="flex justify-between items-end mb-1">
-                                            <span className="text-sm font-semibold text-slate-600">1. ยอดรับรวม (Total Gross 107%)</span>
+                                            <span className="text-sm font-semibold text-slate-600">1. ยอดรับรวม (Total Gross 100%)</span>
                                             <span className="text-lg font-bold text-slate-800">{formatCurrency(results.totalGross)}</span>
                                         </div>
                                         <div className="text-xs text-slate-400">เงินโอนจากลูกค้าทั้งหมด (รวม VAT)</div>
@@ -449,20 +502,20 @@
                                     <div className="relative">
                                         <div className="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-blue-500 ring-4 ring-white"></div>
                                         <div className="flex justify-between items-end mb-1">
-                                            <span className="text-sm font-bold text-blue-900">2. รายได้สุทธิ (Net Revenue 100%)</span>
+                                            <span className="text-sm font-bold text-blue-900">2. ยอดสุทธิ (Net Revenue)</span>
                                             <span className="text-lg font-bold text-blue-900">{formatCurrency(results.netRevenue)}</span>
                                         </div>
-                                        <div className="text-xs text-slate-400 mb-3">ยอดหลังถอด VAT เพื่อนำมาแบ่งสรรปันส่วน</div>
+                                        <div className="text-xs text-slate-400 mb-3">ยอดหลังถอด VAT เพื่อแบ่งสรรปันส่วน</div>
                                         
                                         {/* Distribution Bars */}
                                         <div className="grid grid-cols-2 gap-3">
                                             <div className="bg-slate-50 p-2 rounded border border-slate-100">
                                                 <div className="flex justify-between text-xs mb-1">
-                                                    <span className="text-slate-500">บริษัท ({inputs.shareCompany}%)</span>
+                                                    <span className="text-slate-500">บริษัท ({results.companySharePercent}%)</span>
                                                     <span className="font-bold text-slate-700">{formatCurrency(results.distCompany)}</span>
                                                 </div>
                                                 <div className="w-full bg-slate-200 rounded-full h-1.5">
-                                                    <div className="bg-slate-800 h-1.5 rounded-full" style={{width: `${inputs.shareCompany}%`}}></div>
+                                                    <div className="bg-slate-800 h-1.5 rounded-full" style={{width: `${Math.max(0, results.companySharePercent)}%`}}></div>
                                                 </div>
                                             </div>
                                             <div className="bg-amber-50 p-2 rounded border border-amber-100">
