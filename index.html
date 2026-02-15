@@ -1,612 +1,668 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell 
-} from 'recharts';
-import { 
-  Calculator, DollarSign, TrendingUp, Users, Home, Activity, RefreshCw, 
-  FileText, PieChart as PieIcon, Table as TableIcon, Building2, Wallet, 
-  ArrowRight, Coins
-} from 'lucide-react';
-
-const FinancialDashboard = () => {
-  // --- 1. State Configuration ---
-  const [inputs, setInputs] = useState({
-    // Revenue Drivers - Sales
-    avgHousePrice: 7000000,       
-    salesVolume: 3,               
-    salesCommRate: 5,             
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prime Axis Estate - Financial Dashboard</title>
     
-    // Revenue Drivers - Rentals
-    rentalVolume: 7,              
-    avgRentalPrice: 50000,        
-    rentalCommMonths: 1,          
-
-    // Operational Costs
-    marketingBudget: 100000,      
-    officeRent: 35000,            
-    softwareCost: 10000,          
-
-    // Staff Salaries
-    salaryManager: 30000,
-    salarySales: 36000,    
-    salaryAdmin: 15000,
-    salaryListing: 15000,
-    salaryContent: 15000,
-
-    // Commission Sharing Rules
-    shareSales: 30,
-    shareListing: 2.5,
-    shareAdmin: 2.5,
-    shareCompany: 65,             
+    <!-- 1. Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     
-    initialCapital: 2000000       
-  });
-
-  const [results, setResults] = useState({
-    salesGross: 0,
-    rentalGross: 0,
-    totalGross: 0,
-    vatAmount: 0,
-    netRevenue: 0,
-    distSales: 0,
-    distListing: 0,
-    distAdmin: 0,
-    distCompany: 0,
-    totalSalaries: 0,
-    totalExpenses: 0,
-    monthlyEBT: 0,
-    annualEBT: 0,
-    taxDetails: [],
-    totalTax: 0,
-    annualNetProfit: 0,
-    roi: 0,
-    breakEvenPoint: 0
-  });
-
-  const [cashFlowData, setCashFlowData] = useState([]);
-  const [expensePieData, setExpensePieData] = useState([]);
-
-  // --- 2. Calculation Logic ---
-  useEffect(() => {
-    // A. Revenue Calculations
-    const salesGross = inputs.avgHousePrice * inputs.salesVolume * (inputs.salesCommRate / 100);
-    const rentalGross = inputs.avgRentalPrice * inputs.rentalVolume * inputs.rentalCommMonths;
-    const totalGross = salesGross + rentalGross;
-
-    // VAT Logic (Net = Gross / 1.07)
-    const netRevenue = totalGross / 1.07;
-    const vatAmount = totalGross - netRevenue;
-
-    // B. Commission Distribution
-    const distSales = netRevenue * (inputs.shareSales / 100);
-    const distListing = netRevenue * (inputs.shareListing / 100);
-    const distAdmin = netRevenue * (inputs.shareAdmin / 100);
-    const distCompany = netRevenue * (inputs.shareCompany / 100);
-
-    // C. Expense Calculations
-    const totalSalaries = inputs.salaryManager + inputs.salarySales + inputs.salaryAdmin + inputs.salaryListing + inputs.salaryContent;
-    const fixedCosts = totalSalaries + inputs.officeRent + inputs.softwareCost;
-    const totalExpenses = fixedCosts + inputs.marketingBudget;
-
-    // D. Profit Calculations
-    const monthlyEBT = distCompany - totalExpenses;
-
-    // E. Annual Projections
-    const annualEBT = monthlyEBT * 12;
-
-    // F. Thai SME Tax Calculation
-    let tax = 0;
-    let taxDetails = [];
+    <!-- 2. Load React & ReactDOM (Version 18) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
-    let tier1Base = Math.min(annualEBT, 300000);
-    if (tier1Base < 0) tier1Base = 0;
-    taxDetails.push({ tier: '0 - 300,000', rate: '0%', base: tier1Base, tax: 0 });
+    <!-- 3. Load Dependencies for Recharts (Prop-Types is often needed for UMD builds) -->
+    <script src="https://unpkg.com/prop-types/prop-types.min.js"></script>
 
-    let tier2Base = 0;
-    let tier2Tax = 0;
-    if (annualEBT > 300000) {
-        tier2Base = Math.min(annualEBT - 300000, 2700000);
-        tier2Tax = tier2Base * 0.15;
-    }
-    taxDetails.push({ tier: '300,001 - 3M', rate: '15%', base: tier2Base, tax: tier2Tax });
-
-    let tier3Base = 0;
-    let tier3Tax = 0;
-    if (annualEBT > 3000000) {
-        tier3Base = annualEBT - 3000000;
-        tier3Tax = tier3Base * 0.20;
-    }
-    taxDetails.push({ tier: '> 3,000,000', rate: '20%', base: tier3Base, tax: tier3Tax });
-
-    tax = tier2Tax + tier3Tax;
-
-    const annualNetProfit = annualEBT - tax;
-    const roi = (annualNetProfit / inputs.initialCapital) * 100;
-
-    // G. Break-Even Analysis
-    const breakEvenRevenue = totalExpenses / (inputs.shareCompany / 100) * 1.07;
-
-    setResults({
-      salesGross,
-      rentalGross,
-      totalGross,
-      vatAmount,
-      netRevenue,
-      distSales,
-      distListing,
-      distAdmin,
-      distCompany,
-      totalSalaries,
-      totalExpenses,
-      monthlyEBT,
-      annualEBT,
-      taxDetails,
-      totalTax: tax,
-      annualNetProfit,
-      roi,
-      breakEvenPoint: breakEvenRevenue
-    });
-
-    // H. Generate Cash Flow Data
-    const cfData = [];
-    let currentCash = inputs.initialCapital - 350000;
+    <!-- 4. Load Recharts (Pinned to stable version 2.10.3 for UMD compatibility) -->
+    <script src="https://unpkg.com/recharts@2.10.3/umd/Recharts.js"></script>
     
-    for (let i = 1; i <= 12; i++) {
-        const flow = monthlyEBT;
-        currentCash += flow;
-        let monthlyTax = 0;
-        if (i === 12) {
-            currentCash -= tax;
-            monthlyTax = tax;
+    <!-- 5. Load Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        /* Custom Scrollbar for Tables */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
         }
-        cfData.push({
-            month: i,
-            revenue: distCompany,
-            expenses: totalExpenses,
-            net: flow,
-            tax: monthlyTax,
-            cumulative: currentCash
-        });
-    }
-    setCashFlowData(cfData);
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        body {
+            font-family: 'Sarabun', sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
 
-    setExpensePieData([
-        { name: 'เงินเดือน', value: totalSalaries },
-        { name: 'การตลาด', value: inputs.marketingBudget },
-        { name: 'ค่าเช่า/Ops', value: inputs.officeRent + inputs.softwareCost },
-    ]);
+    <div id="root"></div>
 
-  }, [inputs]);
+    <script type="text/babel">
+        // --- Access Libraries ---
+        const { useState, useEffect } = React;
+        const { 
+            LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, 
+            Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell 
+        } = Recharts;
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setInputs(prev => ({
-      ...prev,
-      [name]: parseFloat(value) || 0
-    }));
-  };
+        // --- Icons (Inline SVGs to avoid dependency issues) ---
+        const IconActivity = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        );
+        const IconHome = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        );
+        const IconUsers = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        );
+        const IconFileText = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+        );
+        const IconPieChart = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+        );
+        const IconTable = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></svg>
+        );
+        const IconRefreshCw = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+        );
+        const IconTrendingUp = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        );
+        const IconBuilding2 = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>
+        );
 
-  const formatCurrency = (num) => {
-    return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB', maximumFractionDigits: 0 }).format(num);
-  };
-
-  const COLORS = {
-    primary: '#0f172a', // Slate 900
-    accent: '#d97706',  // Amber 600
-    success: '#10b981', // Emerald 500
-    danger: '#ef4444',  // Red 500
-    info: '#3b82f6',    // Blue 500
-    chart: ['#0f172a', '#d97706', '#64748b', '#cbd5e1']
-  };
-
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white p-3 border border-slate-200 shadow-lg rounded-lg text-xs">
-          <p className="font-bold text-slate-800 mb-1">{`เดือนที่ ${label}`}</p>
-          {payload.map((entry, index) => (
-            <div key={index} className="flex items-center gap-2 mb-1">
-                <div className="w-2 h-2 rounded-full" style={{backgroundColor: entry.color}}></div>
-                <span className="text-slate-500">{entry.name}:</span>
-                <span className="font-medium" style={{ color: entry.color }}>
-                    {formatCurrency(entry.value)}
-                </span>
-            </div>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
-
-  return (
-    <div className="bg-slate-50 min-h-screen font-sans text-slate-800 pb-10">
-      
-      {/* --- HERO HEADER --- */}
-      <div className="bg-[#0f172a] text-white pt-8 pb-16 px-6 shadow-lg">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center">
-            <div>
-                <div className="flex items-center gap-3 mb-2">
-                    <div className="bg-amber-500 p-2 rounded-lg">
-                        <Activity className="text-white" size={24} />
-                    </div>
-                    <h1 className="text-3xl font-bold tracking-tight">Prime Axis Estate</h1>
-                </div>
-                <p className="text-slate-400 text-sm ml-14">Financial Strategy Simulator & Real-time Analysis</p>
-            </div>
-            
-            <div className="mt-6 md:mt-0 flex gap-4">
-                <div className="bg-slate-800/50 backdrop-blur-sm p-4 rounded-xl border border-slate-700">
-                    <div className="text-xs text-slate-400 uppercase tracking-wider mb-1">กำไรสุทธิคาดการณ์ (ปี)</div>
-                    <div className={`text-3xl font-bold ${results.annualNetProfit > 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                        {formatCurrency(results.annualNetProfit)}
-                    </div>
-                </div>
-                <div className="bg-slate-800/50 backdrop-blur-sm p-4 rounded-xl border border-slate-700">
-                    <div className="text-xs text-slate-400 uppercase tracking-wider mb-1">ROI (ผลตอบแทน)</div>
-                    <div className="text-3xl font-bold text-amber-400">
-                        {results.roi.toFixed(1)}%
-                    </div>
-                </div>
-            </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 -mt-10 grid grid-cols-1 xl:grid-cols-12 gap-6">
-        
-        {/* --- LEFT SIDEBAR: CONTROLS (Col 3/12) --- */}
-        <div className="xl:col-span-3 space-y-5">
-            
-            {/* 1. Revenue Inputs */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                <div className="bg-slate-50 px-5 py-3 border-b border-slate-100 flex items-center gap-2">
-                    <Home size={16} className="text-amber-600" />
-                    <h3 className="font-bold text-slate-700 text-sm">ตัวขับเคลื่อนรายได้ (Revenue)</h3>
-                </div>
+        // --- Main Component ---
+        const FinancialDashboard = () => {
+            // --- 1. State Configuration ---
+            const [inputs, setInputs] = useState({
+                // Revenue Drivers - Sales
+                avgHousePrice: 7000000,       
+                salesVolume: 3,               
+                salesCommRate: 5,             
                 
-                <div className="p-5 space-y-6">
-                    {/* Sales */}
-                    <div>
-                        <div className="flex justify-between items-center mb-2">
-                            <label className="text-xs font-semibold text-slate-600">ยอดขาย (หลัง/เดือน)</label>
-                            <span className="text-xs font-mono bg-amber-50 text-amber-700 px-2 py-0.5 rounded border border-amber-100">{inputs.salesVolume}</span>
-                        </div>
-                        <input 
-                            type="range" name="salesVolume" min="0" max="10" step="0.5" 
-                            value={inputs.salesVolume} onChange={handleInputChange}
-                            className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-600"
-                        />
-                        <div className="mt-3 grid grid-cols-2 gap-2">
-                            <div>
-                                <label className="text-[10px] text-slate-400 block mb-1">ราคาเฉลี่ย (บาท)</label>
-                                <input type="number" name="avgHousePrice" value={inputs.avgHousePrice} onChange={handleInputChange} 
-                                    className="w-full border border-slate-200 rounded px-2 py-1.5 text-xs focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all" />
-                            </div>
-                            <div>
-                                <label className="text-[10px] text-slate-400 block mb-1">คอมมิชชั่น (%)</label>
-                                <input type="number" name="salesCommRate" value={inputs.salesCommRate} onChange={handleInputChange} 
-                                    className="w-full border border-slate-200 rounded px-2 py-1.5 text-xs focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all" />
-                            </div>
-                        </div>
-                    </div>
+                // Revenue Drivers - Rentals
+                rentalVolume: 7,              
+                avgRentalPrice: 50000,        
+                rentalCommMonths: 1,          
 
-                    <div className="h-px bg-slate-100"></div>
+                // Operational Costs
+                marketingBudget: 100000,      
+                officeRent: 35000,            
+                softwareCost: 10000,          
 
-                    {/* Rentals */}
-                    <div>
-                        <div className="flex justify-between items-center mb-2">
-                            <label className="text-xs font-semibold text-slate-600">ยอดเช่า (เคส/เดือน)</label>
-                            <span className="text-xs font-mono bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-100">{inputs.rentalVolume}</span>
-                        </div>
-                        <input 
-                            type="range" name="rentalVolume" min="0" max="20" step="1" 
-                            value={inputs.rentalVolume} onChange={handleInputChange}
-                            className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                        />
-                        <div className="mt-3 grid grid-cols-2 gap-2">
-                            <div>
-                                <label className="text-[10px] text-slate-400 block mb-1">ค่าเช่าเฉลี่ย (บาท)</label>
-                                <input type="number" name="avgRentalPrice" value={inputs.avgRentalPrice} onChange={handleInputChange} 
-                                    className="w-full border border-slate-200 rounded px-2 py-1.5 text-xs focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
-                            </div>
-                            <div>
-                                <label className="text-[10px] text-slate-400 block mb-1">คอมฯ (เดือน)</label>
-                                <input type="number" name="rentalCommMonths" value={inputs.rentalCommMonths} onChange={handleInputChange} 
-                                    className="w-full border border-slate-200 rounded px-2 py-1.5 text-xs focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                // Staff Salaries
+                salaryManager: 30000,
+                salarySales: 36000,    
+                salaryAdmin: 15000,
+                salaryListing: 15000,
+                salaryContent: 15000,
 
-            {/* 2. Staff & Costs */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                <div className="bg-slate-50 px-5 py-3 border-b border-slate-100 flex items-center gap-2">
-                    <Users size={16} className="text-slate-600" />
-                    <h3 className="font-bold text-slate-700 text-sm">ต้นทุน (Costs & Salaries)</h3>
-                </div>
-                <div className="p-5 space-y-3">
-                    {[
-                        { label: 'ผู้จัดการ (Manager)', name: 'salaryManager' },
-                        { label: 'ทีมขาย (Sales Base)', name: 'salarySales' },
-                        { label: 'แอดมิน (Admin)', name: 'salaryAdmin' },
-                        { label: 'ดูแลระบบ (Listing)', name: 'salaryListing' },
-                        { label: 'คอนเทนต์ (Content)', name: 'salaryContent' },
-                    ].map((role) => (
-                        <div key={role.name} className="flex justify-between items-center group">
-                            <label className="text-xs text-slate-500 group-hover:text-slate-800 transition-colors">{role.label}</label>
-                            <input 
-                                type="number" name={role.name} value={inputs[role.name]} onChange={handleInputChange}
-                                className="w-24 bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs text-right focus:bg-white focus:ring-1 focus:ring-slate-400 outline-none"
-                            />
-                        </div>
-                    ))}
-                    <div className="h-px bg-slate-100 my-2"></div>
-                    <div className="flex justify-between items-center">
-                        <label className="text-xs font-semibold text-rose-600">งบการตลาด (Ads)</label>
-                        <input type="number" name="marketingBudget" value={inputs.marketingBudget} onChange={handleInputChange} className="w-24 border border-rose-200 bg-rose-50 rounded px-2 py-1 text-xs text-right font-semibold text-rose-700 focus:ring-1 focus:ring-rose-400 outline-none" />
-                    </div>
-                    <div className="flex justify-between items-center">
-                        <label className="text-xs text-slate-600">ค่าเช่า/Ops</label>
-                        <input type="number" name="officeRent" value={inputs.officeRent} onChange={handleInputChange} className="w-24 border border-slate-200 bg-slate-50 rounded px-2 py-1 text-xs text-right focus:bg-white focus:ring-1 focus:ring-slate-400 outline-none" />
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        {/* --- MIDDLE: BREAKDOWNS (Col 5/12) --- */}
-        <div className="xl:col-span-5 space-y-6">
-            
-            {/* Commission Breakdown Card */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                    <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
-                        <FileText size={16} className="text-slate-500" /> 
-                        เส้นทางของเงิน (Revenue Flow)
-                    </h4>
-                    <span className="text-[10px] text-slate-400 bg-slate-100 px-2 py-1 rounded-full">รายเดือน</span>
-                </div>
+                // Commission Sharing Rules
+                shareSales: 30,
+                shareListing: 2.5,
+                shareAdmin: 2.5,
+                shareCompany: 65,             
                 
-                <div className="p-6">
-                    {/* Visual Flow */}
-                    <div className="relative pl-4 border-l-2 border-slate-100 space-y-6">
+                initialCapital: 2000000       
+            });
+
+            const [results, setResults] = useState({
+                salesGross: 0,
+                rentalGross: 0,
+                totalGross: 0,
+                vatAmount: 0,
+                netRevenue: 0,
+                distSales: 0,
+                distListing: 0,
+                distAdmin: 0,
+                distCompany: 0,
+                totalSalaries: 0,
+                totalExpenses: 0,
+                monthlyEBT: 0,
+                annualEBT: 0,
+                taxDetails: [],
+                totalTax: 0,
+                annualNetProfit: 0,
+                roi: 0,
+                breakEvenPoint: 0
+            });
+
+            const [cashFlowData, setCashFlowData] = useState([]);
+            const [expensePieData, setExpensePieData] = useState([]);
+
+            // --- 2. Calculation Logic ---
+            useEffect(() => {
+                // A. Revenue Calculations
+                const salesGross = inputs.avgHousePrice * inputs.salesVolume * (inputs.salesCommRate / 100);
+                const rentalGross = inputs.avgRentalPrice * inputs.rentalVolume * inputs.rentalCommMonths;
+                const totalGross = salesGross + rentalGross;
+
+                // VAT Logic (Gross is 107%, Net is 100%)
+                // Net Revenue = Total Gross / 1.07
+                const netRevenue = totalGross / 1.07;
+                const vatAmount = totalGross - netRevenue;
+
+                // B. Commission Distribution
+                const distSales = netRevenue * (inputs.shareSales / 100);
+                const distListing = netRevenue * (inputs.shareListing / 100);
+                const distAdmin = netRevenue * (inputs.shareAdmin / 100);
+                const distCompany = netRevenue * (inputs.shareCompany / 100);
+
+                // C. Expense Calculations
+                const totalSalaries = inputs.salaryManager + inputs.salarySales + inputs.salaryAdmin + inputs.salaryListing + inputs.salaryContent;
+                const fixedCosts = totalSalaries + inputs.officeRent + inputs.softwareCost;
+                const totalExpenses = fixedCosts + inputs.marketingBudget;
+
+                // D. Profit Calculations
+                const monthlyEBT = distCompany - totalExpenses;
+
+                // E. Annual Projections
+                const annualEBT = monthlyEBT * 12;
+
+                // F. Thai SME Tax Calculation
+                let tax = 0;
+                let taxDetails = [];
+                
+                let tier1Base = Math.min(annualEBT, 300000);
+                if (tier1Base < 0) tier1Base = 0;
+                taxDetails.push({ tier: '0 - 300,000', rate: '0%', base: tier1Base, tax: 0 });
+
+                let tier2Base = 0;
+                let tier2Tax = 0;
+                if (annualEBT > 300000) {
+                    tier2Base = Math.min(annualEBT - 300000, 2700000);
+                    tier2Tax = tier2Base * 0.15;
+                }
+                taxDetails.push({ tier: '300,001 - 3M', rate: '15%', base: tier2Base, tax: tier2Tax });
+
+                let tier3Base = 0;
+                let tier3Tax = 0;
+                if (annualEBT > 3000000) {
+                    tier3Base = annualEBT - 3000000;
+                    tier3Tax = tier3Base * 0.20;
+                }
+                taxDetails.push({ tier: '> 3,000,000', rate: '20%', base: tier3Base, tax: tier3Tax });
+
+                tax = tier2Tax + tier3Tax;
+
+                const annualNetProfit = annualEBT - tax;
+                const roi = (annualNetProfit / inputs.initialCapital) * 100;
+
+                // G. Break-Even Analysis (Revenue needed to cover expenses)
+                const breakEvenRevenue = (totalExpenses / (inputs.shareCompany / 100)) * 1.07;
+
+                setResults({
+                    salesGross,
+                    rentalGross,
+                    totalGross,
+                    vatAmount,
+                    netRevenue,
+                    distSales,
+                    distListing,
+                    distAdmin,
+                    distCompany,
+                    totalSalaries,
+                    totalExpenses,
+                    monthlyEBT,
+                    annualEBT,
+                    taxDetails,
+                    totalTax: tax,
+                    annualNetProfit,
+                    roi,
+                    breakEvenPoint: breakEvenRevenue
+                });
+
+                // H. Generate Cash Flow Data
+                const cfData = [];
+                let currentCash = inputs.initialCapital - 350000; // Setup cost deduction
+                
+                for (let i = 1; i <= 12; i++) {
+                    const flow = monthlyEBT;
+                    currentCash += flow;
+                    let monthlyTax = 0;
+                    if (i === 12) {
+                        currentCash -= tax;
+                        monthlyTax = tax;
+                    }
+                    cfData.push({
+                        month: i,
+                        revenue: distCompany,
+                        expenses: totalExpenses,
+                        net: flow,
+                        tax: monthlyTax,
+                        cumulative: currentCash
+                    });
+                }
+                setCashFlowData(cfData);
+
+                setExpensePieData([
+                    { name: 'เงินเดือน', value: totalSalaries },
+                    { name: 'การตลาด', value: inputs.marketingBudget },
+                    { name: 'ค่าเช่า/Ops', value: inputs.officeRent + inputs.softwareCost },
+                ]);
+
+            }, [inputs]);
+
+            const handleInputChange = (e) => {
+                const { name, value } = e.target;
+                setInputs(prev => ({
+                    ...prev,
+                    [name]: parseFloat(value) || 0
+                }));
+            };
+
+            const formatCurrency = (num) => {
+                return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB', maximumFractionDigits: 0 }).format(num);
+            };
+
+            const COLORS = {
+                chart: ['#0f172a', '#d97706', '#64748b', '#cbd5e1']
+            };
+
+            return (
+                <div className="bg-slate-50 min-h-screen font-sans text-slate-800 pb-10">
+                
+                {/* --- HERO HEADER --- */}
+                <div className="bg-[#0f172a] text-white pt-8 pb-16 px-6 shadow-lg">
+                    <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center">
+                        <div>
+                            <div className="flex items-center gap-3 mb-2">
+                                <div className="bg-amber-500 p-2 rounded-lg">
+                                    <IconActivity className="text-white" size={24} />
+                                </div>
+                                <h1 className="text-3xl font-bold tracking-tight">Prime Axis Estate</h1>
+                            </div>
+                            <p className="text-slate-400 text-sm ml-14">Financial Strategy Simulator & Real-time Analysis</p>
+                        </div>
                         
-                        {/* 1. Total Gross */}
-                        <div className="relative">
-                            <div className="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-slate-300 ring-4 ring-white"></div>
-                            <div className="flex justify-between items-end mb-1">
-                                <span className="text-sm font-semibold text-slate-600">1. ยอดรับรวม (Total Gross)</span>
-                                <span className="text-lg font-bold text-slate-800">{formatCurrency(results.totalGross)}</span>
+                        <div className="mt-6 md:mt-0 flex gap-4">
+                            <div className="bg-slate-800/50 backdrop-blur-sm p-4 rounded-xl border border-slate-700">
+                                <div className="text-xs text-slate-400 uppercase tracking-wider mb-1">กำไรสุทธิคาดการณ์ (ปี)</div>
+                                <div className={`text-3xl font-bold ${results.annualNetProfit > 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                    {formatCurrency(results.annualNetProfit)}
+                                </div>
                             </div>
-                            <div className="text-xs text-slate-400">เงินโอนจากลูกค้าทั้งหมด (100%)</div>
-                        </div>
-
-                        {/* 2. VAT Deduction */}
-                        <div className="relative">
-                            <div className="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-rose-200 ring-4 ring-white"></div>
-                            <div className="flex justify-between items-center p-3 bg-rose-50 rounded-lg border border-rose-100">
-                                <span className="text-xs font-medium text-rose-700 flex items-center gap-2">
-                                    <TrendingUp size={14} className="rotate-180" /> หัก: ภาษีมูลค่าเพิ่ม (VAT 7%)
-                                </span>
-                                <span className="text-sm font-bold text-rose-700">({formatCurrency(results.vatAmount)})</span>
+                            <div className="bg-slate-800/50 backdrop-blur-sm p-4 rounded-xl border border-slate-700">
+                                <div className="text-xs text-slate-400 uppercase tracking-wider mb-1">ROI (ผลตอบแทน)</div>
+                                <div className="text-3xl font-bold text-amber-400">
+                                    {results.roi.toFixed(1)}%
+                                </div>
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        {/* 3. Net Revenue */}
-                        <div className="relative">
-                            <div className="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-blue-500 ring-4 ring-white"></div>
-                            <div className="flex justify-between items-end mb-1">
-                                <span className="text-sm font-bold text-blue-900">2. รายได้สุทธิ (Net Revenue)</span>
-                                <span className="text-lg font-bold text-blue-900">{formatCurrency(results.netRevenue)}</span>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 -mt-10 grid grid-cols-1 xl:grid-cols-12 gap-6">
+                    
+                    {/* --- LEFT SIDEBAR: CONTROLS (Col 3/12) --- */}
+                    <div className="xl:col-span-3 space-y-5">
+                        
+                        {/* 1. Revenue Inputs */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                            <div className="bg-slate-50 px-5 py-3 border-b border-slate-100 flex items-center gap-2">
+                                <IconHome size={16} className="text-amber-600" />
+                                <h3 className="font-bold text-slate-700 text-sm">ตัวขับเคลื่อนรายได้ (Revenue)</h3>
                             </div>
-                            <div className="text-xs text-slate-400 mb-3">ยอดหลังหักภาษี เพื่อนำมาแบ่งสรรปันส่วน</div>
                             
-                            {/* Distribution Bars */}
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="bg-slate-50 p-2 rounded border border-slate-100">
-                                    <div className="flex justify-between text-xs mb-1">
-                                        <span className="text-slate-500">บริษัท ({inputs.shareCompany}%)</span>
-                                        <span className="font-bold text-slate-700">{formatCurrency(results.distCompany)}</span>
+                            <div className="p-5 space-y-6">
+                                {/* Sales */}
+                                <div>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <label className="text-xs font-semibold text-slate-600">ยอดขาย (หลัง/เดือน)</label>
+                                        <span className="text-xs font-mono bg-amber-50 text-amber-700 px-2 py-0.5 rounded border border-amber-100">{inputs.salesVolume}</span>
                                     </div>
-                                    <div className="w-full bg-slate-200 rounded-full h-1.5">
-                                        <div className="bg-slate-800 h-1.5 rounded-full" style={{width: `${inputs.shareCompany}%`}}></div>
-                                    </div>
-                                </div>
-                                <div className="bg-amber-50 p-2 rounded border border-amber-100">
-                                    <div className="flex justify-between text-xs mb-1">
-                                        <span className="text-amber-700">ทีมขาย ({inputs.shareSales}%)</span>
-                                        <span className="font-bold text-amber-700">{formatCurrency(results.distSales)}</span>
-                                    </div>
-                                    <div className="w-full bg-amber-200 rounded-full h-1.5">
-                                        <div className="bg-amber-500 h-1.5 rounded-full" style={{width: `${inputs.shareSales}%`}}></div>
-                                    </div>
-                                </div>
-                                <div className="bg-slate-50 p-2 rounded border border-slate-100">
-                                    <div className="flex justify-between text-xs mb-1">
-                                        <span className="text-slate-500">Listing ({inputs.shareListing}%)</span>
-                                        <span className="font-bold text-slate-700">{formatCurrency(results.distListing)}</span>
-                                    </div>
-                                    <div className="w-full bg-slate-200 rounded-full h-1.5">
-                                        <div className="bg-blue-400 h-1.5 rounded-full" style={{width: '60%'}}></div>
+                                    <input 
+                                        type="range" name="salesVolume" min="0" max="10" step="0.5" 
+                                        value={inputs.salesVolume} onChange={handleInputChange}
+                                        className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-600"
+                                    />
+                                    <div className="mt-3 grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label className="text-[10px] text-slate-400 block mb-1">ราคาเฉลี่ย (บาท)</label>
+                                            <input type="number" name="avgHousePrice" value={inputs.avgHousePrice} onChange={handleInputChange} 
+                                                className="w-full border border-slate-200 rounded px-2 py-1.5 text-xs focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all" />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] text-slate-400 block mb-1">คอมมิชชั่น (%)</label>
+                                            <input type="number" name="salesCommRate" value={inputs.salesCommRate} onChange={handleInputChange} 
+                                                className="w-full border border-slate-200 rounded px-2 py-1.5 text-xs focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all" />
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="bg-slate-50 p-2 rounded border border-slate-100">
-                                    <div className="flex justify-between text-xs mb-1">
-                                        <span className="text-slate-500">Admin ({inputs.shareAdmin}%)</span>
-                                        <span className="font-bold text-slate-700">{formatCurrency(results.distAdmin)}</span>
+
+                                <div className="h-px bg-slate-100"></div>
+
+                                {/* Rentals */}
+                                <div>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <label className="text-xs font-semibold text-slate-600">ยอดเช่า (เคส/เดือน)</label>
+                                        <span className="text-xs font-mono bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-100">{inputs.rentalVolume}</span>
                                     </div>
-                                    <div className="w-full bg-slate-200 rounded-full h-1.5">
-                                        <div className="bg-purple-400 h-1.5 rounded-full" style={{width: '60%'}}></div>
+                                    <input 
+                                        type="range" name="rentalVolume" min="0" max="20" step="1" 
+                                        value={inputs.rentalVolume} onChange={handleInputChange}
+                                        className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                                    />
+                                    <div className="mt-3 grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label className="text-[10px] text-slate-400 block mb-1">ค่าเช่าเฉลี่ย (บาท)</label>
+                                            <input type="number" name="avgRentalPrice" value={inputs.avgRentalPrice} onChange={handleInputChange} 
+                                                className="w-full border border-slate-200 rounded px-2 py-1.5 text-xs focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] text-slate-400 block mb-1">คอมฯ (เดือน)</label>
+                                            <input type="number" name="rentalCommMonths" value={inputs.rentalCommMonths} onChange={handleInputChange} 
+                                                className="w-full border border-slate-200 rounded px-2 py-1.5 text-xs focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
+                        {/* 2. Staff & Costs */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                            <div className="bg-slate-50 px-5 py-3 border-b border-slate-100 flex items-center gap-2">
+                                <IconUsers size={16} className="text-slate-600" />
+                                <h3 className="font-bold text-slate-700 text-sm">ต้นทุน (Costs & Salaries)</h3>
+                            </div>
+                            <div className="p-5 space-y-3">
+                                {[
+                                    { label: 'ผู้จัดการ (Manager)', name: 'salaryManager' },
+                                    { label: 'ทีมขาย (Sales Base)', name: 'salarySales' },
+                                    { label: 'แอดมิน (Admin)', name: 'salaryAdmin' },
+                                    { label: 'ดูแลระบบ (Listing)', name: 'salaryListing' },
+                                    { label: 'คอนเทนต์ (Content)', name: 'salaryContent' },
+                                ].map((role) => (
+                                    <div key={role.name} className="flex justify-between items-center group">
+                                        <label className="text-xs text-slate-500 group-hover:text-slate-800 transition-colors">{role.label}</label>
+                                        <input 
+                                            type="number" name={role.name} value={inputs[role.name]} onChange={handleInputChange}
+                                            className="w-24 bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs text-right focus:bg-white focus:ring-1 focus:ring-slate-400 outline-none"
+                                        />
+                                    </div>
+                                ))}
+                                <div className="h-px bg-slate-100 my-2"></div>
+                                <div className="flex justify-between items-center">
+                                    <label className="text-xs font-semibold text-rose-600">งบการตลาด (Ads)</label>
+                                    <input type="number" name="marketingBudget" value={inputs.marketingBudget} onChange={handleInputChange} className="w-24 border border-rose-200 bg-rose-50 rounded px-2 py-1 text-xs text-right font-semibold text-rose-700 focus:ring-1 focus:ring-rose-400 outline-none" />
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <label className="text-xs text-slate-600">ค่าเช่า/Ops</label>
+                                    <input type="number" name="officeRent" value={inputs.officeRent} onChange={handleInputChange} className="w-24 border border-slate-200 bg-slate-50 rounded px-2 py-1 text-xs text-right focus:bg-white focus:ring-1 focus:ring-slate-400 outline-none" />
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
-                </div>
-            </div>
 
-            {/* Corporate Tax Table */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                    <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
-                        <Building2 size={16} className="text-slate-500" /> 
-                        ภาษีนิติบุคคล (Corporate Tax)
-                    </h4>
-                    <div className="text-xs font-semibold bg-emerald-100 text-emerald-700 px-2 py-1 rounded">
-                        กำไรสุทธิก่อนภาษี: {formatCurrency(results.annualEBT)}
+                    {/* --- MIDDLE: BREAKDOWNS (Col 5/12) --- */}
+                    <div className="xl:col-span-5 space-y-6">
+                        
+                        {/* Commission Breakdown Card */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                                <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                    <IconFileText size={16} className="text-slate-500" /> 
+                                    เส้นทางของเงิน (Revenue Flow)
+                                </h4>
+                                <span className="text-[10px] text-slate-400 bg-slate-100 px-2 py-1 rounded-full">รายเดือน</span>
+                            </div>
+                            
+                            <div className="p-6">
+                                {/* Visual Flow */}
+                                <div className="relative pl-4 border-l-2 border-slate-100 space-y-6">
+                                    
+                                    {/* 1. Total Gross */}
+                                    <div className="relative">
+                                        <div className="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-slate-300 ring-4 ring-white"></div>
+                                        <div className="flex justify-between items-end mb-1">
+                                            <span className="text-sm font-semibold text-slate-600">1. ยอดรับรวม (Total Gross 107%)</span>
+                                            <span className="text-lg font-bold text-slate-800">{formatCurrency(results.totalGross)}</span>
+                                        </div>
+                                        <div className="text-xs text-slate-400">เงินโอนจากลูกค้าทั้งหมด (รวม VAT)</div>
+                                    </div>
+
+                                    {/* 2. VAT Deduction */}
+                                    <div className="relative">
+                                        <div className="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-rose-200 ring-4 ring-white"></div>
+                                        <div className="flex justify-between items-center p-3 bg-rose-50 rounded-lg border border-rose-100">
+                                            <span className="text-xs font-medium text-rose-700 flex items-center gap-2">
+                                                <IconTrendingUp size={14} className="rotate-180" /> หัก: ภาษีมูลค่าเพิ่ม (VAT 7%)
+                                            </span>
+                                            <span className="text-sm font-bold text-rose-700">({formatCurrency(results.vatAmount)})</span>
+                                        </div>
+                                    </div>
+
+                                    {/* 3. Net Revenue */}
+                                    <div className="relative">
+                                        <div className="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-blue-500 ring-4 ring-white"></div>
+                                        <div className="flex justify-between items-end mb-1">
+                                            <span className="text-sm font-bold text-blue-900">2. รายได้สุทธิ (Net Revenue 100%)</span>
+                                            <span className="text-lg font-bold text-blue-900">{formatCurrency(results.netRevenue)}</span>
+                                        </div>
+                                        <div className="text-xs text-slate-400 mb-3">ยอดหลังถอด VAT เพื่อนำมาแบ่งสรรปันส่วน</div>
+                                        
+                                        {/* Distribution Bars */}
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="bg-slate-50 p-2 rounded border border-slate-100">
+                                                <div className="flex justify-between text-xs mb-1">
+                                                    <span className="text-slate-500">บริษัท ({inputs.shareCompany}%)</span>
+                                                    <span className="font-bold text-slate-700">{formatCurrency(results.distCompany)}</span>
+                                                </div>
+                                                <div className="w-full bg-slate-200 rounded-full h-1.5">
+                                                    <div className="bg-slate-800 h-1.5 rounded-full" style={{width: `${inputs.shareCompany}%`}}></div>
+                                                </div>
+                                            </div>
+                                            <div className="bg-amber-50 p-2 rounded border border-amber-100">
+                                                <div className="flex justify-between text-xs mb-1">
+                                                    <span className="text-amber-700">ทีมขาย ({inputs.shareSales}%)</span>
+                                                    <span className="font-bold text-amber-700">{formatCurrency(results.distSales)}</span>
+                                                </div>
+                                                <div className="w-full bg-amber-200 rounded-full h-1.5">
+                                                    <div className="bg-amber-500 h-1.5 rounded-full" style={{width: `${inputs.shareSales}%`}}></div>
+                                                </div>
+                                            </div>
+                                            <div className="bg-slate-50 p-2 rounded border border-slate-100">
+                                                <div className="flex justify-between text-xs mb-1">
+                                                    <span className="text-slate-500">Listing ({inputs.shareListing}%)</span>
+                                                    <span className="font-bold text-slate-700">{formatCurrency(results.distListing)}</span>
+                                                </div>
+                                                <div className="w-full bg-slate-200 rounded-full h-1.5">
+                                                    <div className="bg-blue-400 h-1.5 rounded-full" style={{width: '60%'}}></div>
+                                                </div>
+                                            </div>
+                                            <div className="bg-slate-50 p-2 rounded border border-slate-100">
+                                                <div className="flex justify-between text-xs mb-1">
+                                                    <span className="text-slate-500">Admin ({inputs.shareAdmin}%)</span>
+                                                    <span className="font-bold text-slate-700">{formatCurrency(results.distAdmin)}</span>
+                                                </div>
+                                                <div className="w-full bg-slate-200 rounded-full h-1.5">
+                                                    <div className="bg-purple-400 h-1.5 rounded-full" style={{width: '60%'}}></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Corporate Tax Table */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                                <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                    <IconBuilding2 size={16} className="text-slate-500" /> 
+                                    ภาษีนิติบุคคล (Corporate Tax)
+                                </h4>
+                                <div className="text-xs font-semibold bg-emerald-100 text-emerald-700 px-2 py-1 rounded">
+                                    กำไรสุทธิก่อนภาษี: {formatCurrency(results.annualEBT)}
+                                </div>
+                            </div>
+
+                            <div className="p-0">
+                                <table className="w-full text-sm">
+                                    <thead className="bg-slate-50 text-slate-500 text-xs uppercase">
+                                        <tr>
+                                            <th className="py-3 pl-6 text-left font-medium">ช่วงกำไร (Net Profit)</th>
+                                            <th className="py-3 text-center font-medium">อัตรา</th>
+                                            <th className="py-3 pr-6 text-right font-medium">ภาษีที่ต้องจ่าย</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100">
+                                        {results.taxDetails.map((item, index) => (
+                                            <tr key={index} className="hover:bg-slate-50/50 transition-colors">
+                                                <td className="py-3 pl-6 text-slate-600">{item.tier}</td>
+                                                <td className="py-3 text-center">
+                                                    <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs font-bold">{item.rate}</span>
+                                                </td>
+                                                <td className="py-3 pr-6 text-right font-medium text-slate-800">{formatCurrency(item.tax)}</td>
+                                            </tr>
+                                        ))}
+                                        <tr className="bg-slate-50/80">
+                                            <td className="py-3 pl-6 font-bold text-slate-800" colSpan="2">รวมภาษีทั้งสิ้น (Total Tax)</td>
+                                            <td className="py-3 pr-6 text-right font-bold text-rose-600">{formatCurrency(results.totalTax)}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
                     </div>
-                </div>
 
-                <div className="p-0">
-                    <table className="w-full text-sm">
-                        <thead className="bg-slate-50 text-slate-500 text-xs uppercase">
-                            <tr>
-                                <th className="py-3 pl-6 text-left font-medium">ช่วงกำไร (Net Profit)</th>
-                                <th className="py-3 text-center font-medium">อัตรา</th>
-                                <th className="py-3 pr-6 text-right font-medium">ภาษีที่ต้องจ่าย</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {results.taxDetails.map((item, index) => (
-                                <tr key={index} className="hover:bg-slate-50/50 transition-colors">
-                                    <td className="py-3 pl-6 text-slate-600">{item.tier}</td>
-                                    <td className="py-3 text-center">
-                                        <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs font-bold">{item.rate}</span>
-                                    </td>
-                                    <td className="py-3 pr-6 text-right font-medium text-slate-800">{formatCurrency(item.tax)}</td>
-                                </tr>
-                            ))}
-                            <tr className="bg-slate-50/80">
-                                <td className="py-3 pl-6 font-bold text-slate-800" colSpan="2">รวมภาษีทั้งสิ้น (Total Tax)</td>
-                                <td className="py-3 pr-6 text-right font-bold text-rose-600">{formatCurrency(results.totalTax)}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-        </div>
-
-        {/* --- RIGHT SIDEBAR: CHARTS & TABLES (Col 4/12) --- */}
-        <div className="xl:col-span-4 space-y-6">
-            
-            {/* Pie Chart Expense */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 h-72 flex flex-col">
-                <h4 className="font-bold text-slate-700 mb-2 text-sm flex items-center gap-2">
-                    <PieIcon size={16} className="text-slate-500" /> สัดส่วนค่าใช้จ่าย (Expenses)
-                </h4>
-                <div className="flex-1 flex items-center">
-                    <div className="w-1/2 h-full relative">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={expensePieData}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius={45}
-                                    outerRadius={65}
-                                    paddingAngle={5}
-                                    dataKey="value"
-                                    stroke="none"
-                                >
+                    {/* --- RIGHT SIDEBAR: CHARTS & TABLES (Col 4/12) --- */}
+                    <div className="xl:col-span-4 space-y-6">
+                        
+                        {/* Pie Chart Expense */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 h-72 flex flex-col">
+                            <h4 className="font-bold text-slate-700 mb-2 text-sm flex items-center gap-2">
+                                <IconPieChart size={16} className="text-slate-500" /> สัดส่วนค่าใช้จ่าย (Expenses)
+                            </h4>
+                            <div className="flex-1 flex items-center">
+                                <div className="w-1/2 h-full relative">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <Pie
+                                                data={expensePieData}
+                                                cx="50%"
+                                                cy="50%"
+                                                innerRadius={45}
+                                                outerRadius={65}
+                                                paddingAngle={5}
+                                                dataKey="value"
+                                                stroke="none"
+                                            >
+                                                {expensePieData.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={COLORS.chart[index % COLORS.chart.length]} />
+                                                ))}
+                                            </Pie>
+                                            <Tooltip formatter={(val) => formatCurrency(val)} />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                        <span className="text-[10px] font-bold text-slate-400">Total</span>
+                                    </div>
+                                </div>
+                                <div className="w-1/2 pl-2 flex flex-col justify-center space-y-3">
                                     {expensePieData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS.chart[index % COLORS.chart.length]} />
+                                        <div key={index} className="flex flex-col">
+                                            <div className="flex items-center gap-2 mb-0.5">
+                                                <div className="w-2 h-2 rounded-full" style={{backgroundColor: COLORS.chart[index]}}></div>
+                                                <span className="text-xs text-slate-500">{entry.name}</span>
+                                            </div>
+                                            <span className="text-sm font-bold text-slate-700 pl-4">{((entry.value/results.totalExpenses)*100).toFixed(0)}%</span>
+                                        </div>
                                     ))}
-                                </Pie>
-                                <RechartsTooltip formatter={(val) => formatCurrency(val)} />
-                            </PieChart>
-                        </ResponsiveContainer>
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <span className="text-[10px] font-bold text-slate-400">Total</span>
-                        </div>
-                    </div>
-                    <div className="w-1/2 pl-2 flex flex-col justify-center space-y-3">
-                        {expensePieData.map((entry, index) => (
-                            <div key={index} className="flex flex-col">
-                                <div className="flex items-center gap-2 mb-0.5">
-                                    <div className="w-2 h-2 rounded-full" style={{backgroundColor: COLORS.chart[index]}}></div>
-                                    <span className="text-xs text-slate-500">{entry.name}</span>
                                 </div>
-                                <span className="text-sm font-bold text-slate-700 pl-4">{((entry.value/results.totalExpenses)*100).toFixed(0)}%</span>
                             </div>
-                        ))}
+                        </div>
+
+                        {/* Break Even Summary */}
+                        <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-lg p-6 text-white relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-4 opacity-10">
+                                <IconRefreshCw size={100} />
+                            </div>
+                            <h4 className="font-bold mb-4 text-sm flex items-center gap-2 opacity-90">
+                                <IconRefreshCw size={16} /> จุดคุ้มทุน (Break-Even)
+                            </h4>
+                            
+                            <div className="mb-6">
+                                <div className="text-xs text-slate-300 mb-1">รายได้รวมขั้นต่ำที่ต้องการ/เดือน</div>
+                                <div className="text-3xl font-bold text-amber-400">{formatCurrency(results.breakEvenPoint)}</div>
+                            </div>
+
+                            <div className="space-y-3 text-sm relative z-10">
+                                <div className="flex justify-between items-center bg-white/10 p-2 rounded-lg backdrop-blur-sm">
+                                    <span className="text-slate-300">ขายบ้าน:</span>
+                                    <span className="font-semibold">{(results.breakEvenPoint / inputs.avgHousePrice).toFixed(2)} หลัง</span>
+                                </div>
+                                <div className="flex justify-between items-center bg-white/10 p-2 rounded-lg backdrop-blur-sm">
+                                    <span className="text-slate-300">เช่าบ้าน:</span>
+                                    <span className="font-semibold">{(results.breakEvenPoint / (inputs.avgRentalPrice * inputs.rentalCommMonths)).toFixed(1)} เคส</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Cash Flow Table */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col h-[400px]">
+                            <div className="px-5 py-3 border-b border-slate-100 bg-slate-50/50">
+                                <h4 className="font-bold text-slate-700 text-sm flex items-center gap-2">
+                                    <IconTable size={16} className="text-slate-500" /> กระแสเงินสด (Cash Flow)
+                                </h4>
+                            </div>
+                            
+                            <div className="overflow-auto flex-1 p-0 custom-scrollbar">
+                                <table className="w-full text-xs border-collapse">
+                                    <thead className="bg-slate-100 sticky top-0 z-10 text-slate-500 font-medium">
+                                        <tr>
+                                            <th className="py-2 px-2 text-center border-b">M</th>
+                                            <th className="py-2 px-2 text-right border-b">Net In</th>
+                                            <th className="py-2 px-2 text-right border-b">Exp</th>
+                                            <th className="py-2 px-3 text-right border-b">Balance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-50">
+                                        <tr className="bg-amber-50/50 text-slate-500 italic">
+                                            <td className="py-2 px-2 text-center">0</td>
+                                            <td className="py-2 px-2 text-right text-transparent">-</td>
+                                            <td className="py-2 px-2 text-right text-transparent">-</td>
+                                            <td className="py-2 px-3 text-right font-medium">{formatCurrency(inputs.initialCapital - 350000)}</td>
+                                        </tr>
+                                        {cashFlowData.map((row, index) => (
+                                            <tr key={index} className={`hover:bg-slate-50 transition-colors ${row.month === 12 ? 'bg-indigo-50/50' : ''}`}>
+                                                <td className="py-2 px-2 text-center text-slate-400">{row.month}</td>
+                                                <td className="py-2 px-2 text-right text-emerald-600 font-medium">{formatCurrency(row.revenue)}</td>
+                                                <td className="py-2 px-2 text-right text-rose-500">{formatCurrency(row.expenses)}</td>
+                                                <td className="py-2 px-3 text-right font-bold text-slate-700">
+                                                    {formatCurrency(row.cumulative)}
+                                                    {row.tax > 0 && <div className="text-[9px] text-indigo-500 font-normal">(-Tax {formatCurrency(row.tax)})</div>}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
+            );
+        };
 
-            {/* Break Even Summary */}
-            <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-lg p-6 text-white relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-10">
-                    <RefreshCw size={100} />
-                </div>
-                <h4 className="font-bold mb-4 text-sm flex items-center gap-2 opacity-90">
-                    <RefreshCw size={16} /> จุดคุ้มทุน (Break-Even)
-                </h4>
-                
-                <div className="mb-6">
-                    <div className="text-xs text-slate-300 mb-1">รายได้รวมขั้นต่ำที่ต้องการ/เดือน</div>
-                    <div className="text-3xl font-bold text-amber-400">{formatCurrency(results.breakEvenPoint)}</div>
-                </div>
-
-                <div className="space-y-3 text-sm relative z-10">
-                    <div className="flex justify-between items-center bg-white/10 p-2 rounded-lg backdrop-blur-sm">
-                        <span className="text-slate-300">ขายบ้าน:</span>
-                        <span className="font-semibold">{(results.breakEvenPoint / inputs.avgHousePrice).toFixed(2)} หลัง</span>
-                    </div>
-                    <div className="flex justify-between items-center bg-white/10 p-2 rounded-lg backdrop-blur-sm">
-                        <span className="text-slate-300">เช่าบ้าน:</span>
-                        <span className="font-semibold">{(results.breakEvenPoint / (inputs.avgRentalPrice * inputs.rentalCommMonths)).toFixed(1)} เคส</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* Cash Flow Table */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col h-[400px]">
-                <div className="px-5 py-3 border-b border-slate-100 bg-slate-50/50">
-                    <h4 className="font-bold text-slate-700 text-sm flex items-center gap-2">
-                        <TableIcon size={16} className="text-slate-500" /> กระแสเงินสด (Cash Flow)
-                    </h4>
-                </div>
-                
-                <div className="overflow-auto flex-1 p-0 custom-scrollbar">
-                    <table className="w-full text-xs border-collapse">
-                        <thead className="bg-slate-100 sticky top-0 z-10 text-slate-500 font-medium">
-                            <tr>
-                                <th className="py-2 px-2 text-center border-b">M</th>
-                                <th className="py-2 px-2 text-right border-b">Net In</th>
-                                <th className="py-2 px-2 text-right border-b">Exp</th>
-                                <th className="py-2 px-3 text-right border-b">Balance</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-50">
-                            <tr className="bg-amber-50/50 text-slate-500 italic">
-                                <td className="py-2 px-2 text-center">0</td>
-                                <td className="py-2 px-2 text-right text-transparent">-</td>
-                                <td className="py-2 px-2 text-right text-transparent">-</td>
-                                <td className="py-2 px-3 text-right font-medium">{formatCurrency(inputs.initialCapital - 350000)}</td>
-                            </tr>
-                            {cashFlowData.map((row, index) => (
-                                <tr key={index} className={`hover:bg-slate-50 transition-colors ${row.month === 12 ? 'bg-indigo-50/50' : ''}`}>
-                                    <td className="py-2 px-2 text-center text-slate-400">{row.month}</td>
-                                    <td className="py-2 px-2 text-right text-emerald-600 font-medium">{formatCurrency(row.revenue)}</td>
-                                    <td className="py-2 px-2 text-right text-rose-500">{formatCurrency(row.expenses)}</td>
-                                    <td className="py-2 px-3 text-right font-bold text-slate-700">
-                                        {formatCurrency(row.cumulative)}
-                                        {row.tax > 0 && <div className="text-[9px] text-indigo-500 font-normal">(-Tax {formatCurrency(row.tax)})</div>}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default FinancialDashboard;
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<FinancialDashboard />);
+    </script>
+</body>
+</html>
