@@ -39,7 +39,6 @@
         body {
             font-family: 'Sarabun', sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
         }
-        /* Remove arrows from number input */
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
             -webkit-appearance: none; 
@@ -52,49 +51,42 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        // --- Access Libraries ---
         const { useState, useEffect } = React;
         const { 
             LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, 
             Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell 
         } = Recharts;
 
-        // --- Icons ---
-        const IconActivity = ({ className, size = 24 }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-        );
-        const IconHome = ({ className, size = 24 }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        );
-        const IconUsers = ({ className, size = 24 }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        );
-        const IconFileText = ({ className, size = 24 }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
-        );
-        const IconPieChart = ({ className, size = 24 }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
-        );
-        const IconTable = ({ className, size = 24 }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></svg>
-        );
-        const IconRefreshCw = ({ className, size = 24 }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
-        );
-        const IconTrendingUp = ({ className, size = 24 }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-        );
-        const IconBuilding2 = ({ className, size = 24 }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>
-        );
-        const IconSettings = ({ className, size = 24 }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.74v-.47a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-        );
+        // Icons
+        const IconActivity = ({ className, size = 24 }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>;
+        const IconHome = ({ className, size = 24 }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
+        const IconUsers = ({ className, size = 24 }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
+        const IconFileText = ({ className, size = 24 }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>;
+        const IconPieChart = ({ className, size = 24 }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>;
+        const IconTable = ({ className, size = 24 }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></svg>;
+        const IconRefreshCw = ({ className, size = 24 }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>;
+        const IconTrendingUp = ({ className, size = 24 }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>;
+        const IconBuilding2 = ({ className, size = 24 }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>;
+        const IconSettings = ({ className, size = 24 }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.74v-.47a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>;
+        const IconClock = ({ className, size = 24 }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
+        const IconToggleLeft = ({ className, size = 24 }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="12" x="2" y="6" rx="6" ry="6"/><circle cx="8" cy="12" r="2"/></svg>;
+        const IconToggleRight = ({ className, size = 24 }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="12" x="2" y="6" rx="6" ry="6"/><circle cx="16" cy="12" r="2"/></svg>;
+        const IconBriefcase = ({ className, size = 24 }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>;
 
-        // --- Main Component ---
         const FinancialDashboard = () => {
             // --- 1. State Configuration ---
             const [inputs, setInputs] = useState({
+                // Parameters
+                vatMode: 'include', // 'include' (ถอด VAT) or 'exclude' (คิดเพิ่ม)
+
+                // CAPEX (Capital Expenditure)
+                initialCapital: 2000000,
+                capexRegistration: 20000,
+                capexOffice: 120000,
+                capexEquipment: 100000,
+                capexTech: 60000,
+                capexLaunch: 50000,
+
                 // Revenue Drivers
                 avgHousePrice: 7000000,       
                 salesVolume: 3,               
@@ -107,34 +99,42 @@
                 marketingBudget: 100000,      
                 officeRent: 35000,            
                 softwareCost: 10000,          
+                otherExpenses: 0, 
 
-                // Salaries (Rate per person & Count)
+                // Salaries
                 salaryManagerRate: 30000, salaryManagerCount: 1,
                 salarySalesRate: 18000,   salarySalesCount: 2,
                 salaryAdminRate: 15000,   salaryAdminCount: 1,
                 salaryListingRate: 15000, salaryListingCount: 1,
                 salaryContentRate: 15000, salaryContentCount: 1,
 
-                // Commission Sharing (% of Net Revenue)
+                // Sharing %
                 shareSales: 30,
                 shareListing: 2.5,
                 shareAdmin: 2.5,
+                shareManager: 0, // NEW
+                shareContent: 0, // NEW
                 
                 initialCapital: 2000000       
             });
 
             const [results, setResults] = useState({
+                totalCapex: 0,
+                workingCapital: 0,
                 totalGross: 0,
                 vatAmount: 0,
                 netRevenue: 0,
                 distSales: 0,
                 distListing: 0,
                 distAdmin: 0,
+                distManager: 0,
+                distContent: 0,
                 distCompany: 0,
                 companySharePercent: 0,
                 totalExpenses: 0,
                 annualNetProfit: 0,
                 roi: 0,
+                paybackPeriod: 0,
                 breakEvenPoint: 0,
                 taxDetails: [],
                 totalTax: 0,
@@ -145,26 +145,52 @@
 
             const [cashFlowData, setCashFlowData] = useState([]);
             const [expensePieData, setExpensePieData] = useState([]);
+            const [revenuePieData, setRevenuePieData] = useState([]);
 
             // --- 2. Calculation Logic ---
             useEffect(() => {
-                // A. Revenue
-                const salesGross = inputs.avgHousePrice * inputs.salesVolume * (inputs.salesCommRate / 100);
-                const rentalGross = inputs.avgRentalPrice * inputs.rentalVolume * inputs.rentalCommMonths;
-                const totalGross = salesGross + rentalGross;
+                // A. CAPEX Calculation
+                const totalCapex = inputs.capexRegistration + inputs.capexOffice + inputs.capexEquipment + inputs.capexTech + inputs.capexLaunch;
+                const workingCapital = inputs.initialCapital - totalCapex;
 
-                // VAT Logic
-                const netRevenue = totalGross / 1.07;
-                const vatAmount = totalGross - netRevenue;
+                // B. Revenue Basis Calculation
+                const salesBase = inputs.avgHousePrice * inputs.salesVolume * (inputs.salesCommRate / 100);
+                const rentalBase = inputs.avgRentalPrice * inputs.rentalVolume * inputs.rentalCommMonths;
+                const baseRevenue = salesBase + rentalBase;
 
-                // B. Commission Distribution
+                // C. VAT Logic
+                let totalGross, netRevenue, vatAmount;
+                let salesNet, rentalNet;
+
+                if (inputs.vatMode === 'include') {
+                    totalGross = baseRevenue; 
+                    netRevenue = totalGross / 1.07;
+                    vatAmount = totalGross - netRevenue;
+                    salesNet = salesBase / 1.07;
+                    rentalNet = rentalBase / 1.07;
+                } else {
+                    netRevenue = baseRevenue;
+                    vatAmount = netRevenue * 0.07;
+                    totalGross = netRevenue + vatAmount;
+                    salesNet = salesBase;
+                    rentalNet = rentalBase;
+                }
+
+                // D. Commission Distribution
                 const distSales = netRevenue * (inputs.shareSales / 100);
                 const distListing = netRevenue * (inputs.shareListing / 100);
                 const distAdmin = netRevenue * (inputs.shareAdmin / 100);
-                const companySharePercent = 100 - inputs.shareSales - inputs.shareListing - inputs.shareAdmin;
+                const distManager = netRevenue * (inputs.shareManager / 100);
+                const distContent = netRevenue * (inputs.shareContent / 100);
+                
+                const companySharePercent = 100 - inputs.shareSales - inputs.shareListing - inputs.shareAdmin - inputs.shareManager - inputs.shareContent;
                 const distCompany = netRevenue * (companySharePercent / 100);
 
-                // C. Expenses (Updated for multiple staff)
+                // Pie Chart Revenue: Company Net Share
+                const salesCompanyIncome = salesNet * (companySharePercent / 100);
+                const rentalCompanyIncome = rentalNet * (companySharePercent / 100);
+
+                // E. Expenses
                 const totalSalaries = 
                     (inputs.salaryManagerRate * inputs.salaryManagerCount) +
                     (inputs.salarySalesRate * inputs.salarySalesCount) +
@@ -172,14 +198,14 @@
                     (inputs.salaryListingRate * inputs.salaryListingCount) +
                     (inputs.salaryContentRate * inputs.salaryContentCount);
 
-                const fixedCosts = totalSalaries + inputs.officeRent + inputs.softwareCost;
+                const fixedCosts = totalSalaries + inputs.officeRent + inputs.softwareCost + inputs.otherExpenses;
                 const totalExpenses = fixedCosts + inputs.marketingBudget;
 
-                // D. Profit
+                // F. Profit
                 const monthlyEBT = distCompany - totalExpenses;
                 const annualEBT = monthlyEBT * 12;
 
-                // E. Tax
+                // G. Tax
                 let tax = 0;
                 let taxDetails = [];
                 let tier1Base = Math.min(annualEBT, 300000); if(tier1Base<0) tier1Base=0;
@@ -202,23 +228,35 @@
 
                 const annualNetProfit = annualEBT - tax;
                 const roi = (annualNetProfit / inputs.initialCapital) * 100;
+                
+                let paybackPeriod = Infinity;
+                if (monthlyEBT > 0) {
+                    paybackPeriod = inputs.initialCapital / monthlyEBT;
+                }
 
-                // F. Break Even
+                // H. Break Even
                 let breakEvenRevenue = 0;
                 if (companySharePercent > 0) {
-                    breakEvenRevenue = (totalExpenses / (companySharePercent / 100)) * 1.07;
+                    const netRevenueNeeded = totalExpenses / (companySharePercent / 100);
+                    if (inputs.vatMode === 'include') {
+                        breakEvenRevenue = netRevenueNeeded * 1.07;
+                    } else {
+                        breakEvenRevenue = netRevenueNeeded; 
+                    }
                 }
 
                 setResults({
+                    totalCapex, workingCapital,
                     totalGross, vatAmount, netRevenue,
-                    distSales, distListing, distAdmin, distCompany, companySharePercent,
-                    totalExpenses, annualNetProfit, roi, breakEvenPoint: breakEvenRevenue,
+                    distSales, distListing, distAdmin, distManager, distContent, distCompany, companySharePercent,
+                    totalExpenses, annualNetProfit, roi, paybackPeriod, breakEvenPoint: breakEvenRevenue,
                     taxDetails, totalTax: tax, monthlyEBT, annualEBT, totalSalaries
                 });
 
                 // Cash Flow Data
                 const cfData = [];
-                let currentCash = inputs.initialCapital - 350000; 
+                let currentCash = workingCapital; // Start with Working Capital (Capital - CAPEX)
+                
                 for (let i = 1; i <= 12; i++) {
                     currentCash += monthlyEBT;
                     let monthlyTax = (i === 12) ? tax : 0;
@@ -234,10 +272,18 @@
                 }
                 setCashFlowData(cfData);
 
+                // Pie Data - Expense
                 setExpensePieData([
                     { name: 'เงินเดือน', value: totalSalaries },
                     { name: 'การตลาด', value: inputs.marketingBudget },
-                    { name: 'ค่าเช่า/Ops', value: inputs.officeRent + inputs.softwareCost },
+                    { name: 'ค่าเช่าออฟฟิศ', value: inputs.officeRent },
+                    { name: 'อื่นๆ/Soft', value: inputs.softwareCost + inputs.otherExpenses },
+                ]);
+
+                // Pie Data - Revenue (NET Company Income Only)
+                setRevenuePieData([
+                    { name: 'ขาย (Sales)', value: salesCompanyIncome },
+                    { name: 'เช่า (Rentals)', value: rentalCompanyIncome },
                 ]);
 
             }, [inputs]);
@@ -250,21 +296,36 @@
                 }));
             };
 
+            const toggleVatMode = () => {
+                setInputs(prev => ({
+                    ...prev,
+                    vatMode: prev.vatMode === 'include' ? 'exclude' : 'include'
+                }));
+            }
+
             const formatCurrency = (num) => {
                 return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB', maximumFractionDigits: 0 }).format(num);
             };
 
             const COLORS = {
-                chart: ['#0f172a', '#d97706', '#64748b', '#cbd5e1']
+                chart: ['#0f172a', '#d97706', '#64748b', '#cbd5e1'],
+                revenue: ['#3b82f6', '#f59e0b']
             };
 
-            // Staff Roles Configuration
             const staffRoles = [
                 { id: 'Manager', label: 'ผู้จัดการ', rateKey: 'salaryManagerRate', countKey: 'salaryManagerCount' },
                 { id: 'Sales', label: 'ทีมขาย', rateKey: 'salarySalesRate', countKey: 'salarySalesCount' },
                 { id: 'Admin', label: 'แอดมิน', rateKey: 'salaryAdminRate', countKey: 'salaryAdminCount' },
                 { id: 'Listing', label: 'Listing', rateKey: 'salaryListingRate', countKey: 'salaryListingCount' },
                 { id: 'Content', label: 'Content', rateKey: 'salaryContentRate', countKey: 'salaryContentCount' },
+            ];
+
+            const capexItems = [
+                { label: 'จดทะเบียน', name: 'capexRegistration' },
+                { label: 'ตกแต่งสนง.', name: 'capexOffice' },
+                { label: 'อุปกรณ์ IT', name: 'capexEquipment' },
+                { label: 'ระบบ Tech', name: 'capexTech' },
+                { label: 'เปิดตัว/ตลาด', name: 'capexLaunch' },
             ];
 
             return (
@@ -290,10 +351,12 @@
                                     {formatCurrency(results.annualNetProfit)}
                                 </div>
                             </div>
-                            <div className="bg-slate-800/50 backdrop-blur-sm p-4 rounded-xl border border-slate-700">
-                                <div className="text-xs text-slate-400 uppercase tracking-wider mb-1">ROI (ผลตอบแทน)</div>
+                            <div className="bg-slate-800/50 backdrop-blur-sm p-4 rounded-xl border border-slate-700 min-w-[140px]">
+                                <div className="text-xs text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                    <IconClock size={12} /> ระยะเวลาคืนทุน
+                                </div>
                                 <div className="text-3xl font-bold text-amber-400">
-                                    {results.roi.toFixed(1)}%
+                                    {results.paybackPeriod === Infinity || results.paybackPeriod < 0 ? 'N/A' : `${results.paybackPeriod.toFixed(1)} เดือน`}
                                 </div>
                             </div>
                         </div>
@@ -304,12 +367,60 @@
                     
                     {/* --- LEFT SIDEBAR: CONTROLS (Col 3/12) --- */}
                     <div className="xl:col-span-3 space-y-5">
+
+                        {/* NEW: CAPEX Inputs */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                            <div className="bg-slate-50 px-5 py-3 border-b border-slate-100 flex items-center gap-2">
+                                <IconBriefcase size={16} className="text-indigo-600" />
+                                <h3 className="font-bold text-slate-700 text-sm">งบลงทุนเริ่มต้น (CAPEX)</h3>
+                            </div>
+                            <div className="p-5 space-y-3">
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-600 mb-1 block">ทุนจดทะเบียน</label>
+                                    <input type="number" name="initialCapital" value={inputs.initialCapital} onChange={handleInputChange} 
+                                        className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 text-xs text-right focus:bg-white focus:ring-1 focus:ring-indigo-400 outline-none font-bold" />
+                                </div>
+                                <div className="h-px bg-slate-100 my-1"></div>
+                                {capexItems.map((item) => (
+                                    <div key={item.name} className="flex justify-between items-center">
+                                        <label className="text-xs text-slate-500">{item.label}</label>
+                                        <input type="number" name={item.name} value={inputs[item.name]} onChange={handleInputChange} 
+                                            className="w-24 border border-slate-200 rounded px-2 py-1 text-xs text-right focus:ring-1 focus:ring-indigo-400 outline-none" />
+                                    </div>
+                                ))}
+                                <div className="mt-3 pt-3 border-t border-slate-100">
+                                    <div className="flex justify-between text-xs mb-1">
+                                        <span className="text-slate-600">รวมจ่ายลงทุน:</span>
+                                        <span className="font-semibold text-rose-600">{formatCurrency(results.totalCapex)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-xs">
+                                        <span className="text-slate-600 font-bold">เงินทุนหมุนเวียนคงเหลือ:</span>
+                                        <span className="font-bold text-emerald-600">{formatCurrency(results.workingCapital)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         
                         {/* 1. Revenue Inputs */}
                         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                            <div className="bg-slate-50 px-5 py-3 border-b border-slate-100 flex items-center gap-2">
-                                <IconHome size={16} className="text-amber-600" />
-                                <h3 className="font-bold text-slate-700 text-sm">รายได้ (Revenue)</h3>
+                            <div className="bg-slate-50 px-5 py-3 border-b border-slate-100 flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <IconHome size={16} className="text-amber-600" />
+                                    <h3 className="font-bold text-slate-700 text-sm">รายได้ (Revenue)</h3>
+                                </div>
+                                
+                                {/* VAT Toggle */}
+                                <button 
+                                    onClick={toggleVatMode}
+                                    className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold transition-all ${
+                                        inputs.vatMode === 'include' 
+                                        ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                                        : 'bg-orange-100 text-orange-700 border border-orange-200'
+                                    }`}
+                                >
+                                    {inputs.vatMode === 'include' ? 'VAT ในตัว' : 'VAT แยก'}
+                                    {inputs.vatMode === 'include' ? <IconToggleLeft size={14}/> : <IconToggleRight size={14}/>}
+                                </button>
                             </div>
                             
                             <div className="p-5 space-y-6">
@@ -408,8 +519,16 @@
                                     <input type="number" name="marketingBudget" value={inputs.marketingBudget} onChange={handleInputChange} className="w-24 border border-rose-200 bg-rose-50 rounded px-2 py-1 text-xs text-right font-semibold text-rose-700 focus:ring-1 focus:ring-rose-400 outline-none" />
                                 </div>
                                 <div className="flex justify-between items-center px-1">
-                                    <label className="text-xs text-slate-600">ค่าเช่า/Ops</label>
+                                    <label className="text-xs text-slate-600">ค่าเช่าออฟฟิศ</label>
                                     <input type="number" name="officeRent" value={inputs.officeRent} onChange={handleInputChange} className="w-24 border border-slate-200 bg-slate-50 rounded px-2 py-1 text-xs text-right focus:bg-white focus:ring-1 focus:ring-slate-400 outline-none" />
+                                </div>
+                                <div className="flex justify-between items-center px-1">
+                                    <label className="text-xs text-slate-600">Software/Misc</label>
+                                    <input type="number" name="softwareCost" value={inputs.softwareCost} onChange={handleInputChange} className="w-24 border border-slate-200 bg-slate-50 rounded px-2 py-1 text-xs text-right focus:bg-white focus:ring-1 focus:ring-slate-400 outline-none" />
+                                </div>
+                                <div className="flex justify-between items-center px-1">
+                                    <label className="text-xs text-slate-600">ค่าใช้จ่ายอื่นๆ</label>
+                                    <input type="number" name="otherExpenses" value={inputs.otherExpenses} onChange={handleInputChange} className="w-24 border border-slate-200 bg-slate-50 rounded px-2 py-1 text-xs text-right focus:bg-white focus:ring-1 focus:ring-slate-400 outline-none" />
                                 </div>
                             </div>
                         </div>
@@ -429,6 +548,13 @@
                                     </div>
                                 </div>
                                 <div className="flex justify-between items-center">
+                                    <label className="text-xs text-slate-600">ผู้จัดการ (Manager)</label>
+                                    <div className="flex items-center gap-1">
+                                        <input type="number" name="shareManager" value={inputs.shareManager} onChange={handleInputChange} className="w-14 border border-slate-200 bg-slate-50 rounded px-1 py-1 text-xs text-center" />
+                                        <span className="text-xs text-slate-400">%</span>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between items-center">
                                     <label className="text-xs text-slate-600">Listing</label>
                                     <div className="flex items-center gap-1">
                                         <input type="number" name="shareListing" value={inputs.shareListing} onChange={handleInputChange} className="w-14 border border-slate-200 bg-slate-50 rounded px-1 py-1 text-xs text-center" />
@@ -439,6 +565,13 @@
                                     <label className="text-xs text-slate-600">Admin</label>
                                     <div className="flex items-center gap-1">
                                         <input type="number" name="shareAdmin" value={inputs.shareAdmin} onChange={handleInputChange} className="w-14 border border-slate-200 bg-slate-50 rounded px-1 py-1 text-xs text-center" />
+                                        <span className="text-xs text-slate-400">%</span>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <label className="text-xs text-slate-600">Content</label>
+                                    <div className="flex items-center gap-1">
+                                        <input type="number" name="shareContent" value={inputs.shareContent} onChange={handleInputChange} className="w-14 border border-slate-200 bg-slate-50 rounded px-1 py-1 text-xs text-center" />
                                         <span className="text-xs text-slate-400">%</span>
                                     </div>
                                 </div>
@@ -481,10 +614,10 @@
                                     <div className="relative">
                                         <div className="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-slate-300 ring-4 ring-white"></div>
                                         <div className="flex justify-between items-end mb-1">
-                                            <span className="text-sm font-semibold text-slate-600">1. ยอดรับรวม (Total Gross 100%)</span>
+                                            <span className="text-sm font-semibold text-slate-600">1. ยอดรับรวม ({inputs.vatMode === 'include' ? '100% รวม VAT' : 'Base + 7%'})</span>
                                             <span className="text-lg font-bold text-slate-800">{formatCurrency(results.totalGross)}</span>
                                         </div>
-                                        <div className="text-xs text-slate-400">เงินโอนจากลูกค้าทั้งหมด (รวม VAT)</div>
+                                        <div className="text-xs text-slate-400">เงินโอนจากลูกค้าทั้งหมด</div>
                                     </div>
 
                                     {/* 2. VAT Deduction */}
@@ -529,6 +662,15 @@
                                             </div>
                                             <div className="bg-slate-50 p-2 rounded border border-slate-100">
                                                 <div className="flex justify-between text-xs mb-1">
+                                                    <span className="text-slate-500">Manager ({inputs.shareManager}%)</span>
+                                                    <span className="font-bold text-slate-700">{formatCurrency(results.distManager)}</span>
+                                                </div>
+                                                <div className="w-full bg-slate-200 rounded-full h-1.5">
+                                                    <div className="bg-indigo-400 h-1.5 rounded-full" style={{width: '60%'}}></div>
+                                                </div>
+                                            </div>
+                                            <div className="bg-slate-50 p-2 rounded border border-slate-100">
+                                                <div className="flex justify-between text-xs mb-1">
                                                     <span className="text-slate-500">Listing ({inputs.shareListing}%)</span>
                                                     <span className="font-bold text-slate-700">{formatCurrency(results.distListing)}</span>
                                                 </div>
@@ -544,6 +686,36 @@
                                                 <div className="w-full bg-slate-200 rounded-full h-1.5">
                                                     <div className="bg-purple-400 h-1.5 rounded-full" style={{width: '60%'}}></div>
                                                 </div>
+                                            </div>
+                                            <div className="bg-slate-50 p-2 rounded border border-slate-100">
+                                                <div className="flex justify-between text-xs mb-1">
+                                                    <span className="text-slate-500">Content ({inputs.shareContent}%)</span>
+                                                    <span className="font-bold text-slate-700">{formatCurrency(results.distContent)}</span>
+                                                </div>
+                                                <div className="w-full bg-slate-200 rounded-full h-1.5">
+                                                    <div className="bg-pink-400 h-1.5 rounded-full" style={{width: '60%'}}></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* 4. Company Final Calculation (NEW) */}
+                                    <div className="relative pt-4 border-t border-slate-100 mt-4">
+                                        <div className="absolute -left-[21px] top-6 w-3 h-3 rounded-full bg-emerald-500 ring-4 ring-white"></div>
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between items-center text-xs">
+                                                <span className="text-slate-600">รายรับเข้าบริษัท (Company Share):</span>
+                                                <span className="font-semibold text-slate-800">{formatCurrency(results.distCompany)}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center text-xs">
+                                                <span className="text-red-500">- หัก: ค่าใช้จ่ายรวม (Total Expenses):</span>
+                                                <span className="font-semibold text-red-500">({formatCurrency(results.totalExpenses)})</span>
+                                            </div>
+                                            <div className="flex justify-between items-center pt-2 border-t border-dashed border-slate-200">
+                                                <span className="text-sm font-bold text-emerald-700">= กำไรสุทธิต่อเดือน (Monthly Net Profit):</span>
+                                                <span className={`text-lg font-bold ${results.monthlyEBT > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                                                    {formatCurrency(results.monthlyEBT)}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -597,8 +769,52 @@
                     {/* --- RIGHT SIDEBAR: CHARTS & TABLES (Col 4/12) --- */}
                     <div className="xl:col-span-4 space-y-6">
                         
+                        {/* New: Revenue Pie Chart */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 h-64 flex flex-col">
+                            <h4 className="font-bold text-slate-700 mb-2 text-sm flex items-center gap-2">
+                                <IconPieChart size={16} className="text-slate-500" /> สัดส่วนรายได้สุทธิเข้าบริษัท (Net Income Mix)
+                            </h4>
+                            <div className="flex-1 flex items-center">
+                                <div className="w-1/2 h-full relative">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <Pie
+                                                data={revenuePieData}
+                                                cx="50%"
+                                                cy="50%"
+                                                innerRadius={40}
+                                                outerRadius={55}
+                                                paddingAngle={5}
+                                                dataKey="value"
+                                                stroke="none"
+                                            >
+                                                {revenuePieData.map((entry, index) => (
+                                                    <Cell key={`cell-rev-${index}`} fill={COLORS.revenue[index % COLORS.revenue.length]} />
+                                                ))}
+                                            </Pie>
+                                            <Tooltip formatter={(val) => formatCurrency(val)} />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                </div>
+                                <div className="w-1/2 pl-2 flex flex-col justify-center space-y-3">
+                                    {revenuePieData.map((entry, index) => (
+                                        <div key={index} className="flex flex-col">
+                                            <div className="flex items-center gap-2 mb-0.5">
+                                                <div className="w-2 h-2 rounded-full" style={{backgroundColor: COLORS.revenue[index]}}></div>
+                                                <span className="text-xs text-slate-500">{entry.name}</span>
+                                            </div>
+                                            <div className="pl-4">
+                                                <span className="text-sm font-bold text-slate-700 block leading-tight">{formatCurrency(entry.value)}</span>
+                                                <span className="text-[10px] text-slate-400 font-medium">{((entry.value/results.distCompany)*100).toFixed(1)}%</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
                         {/* Pie Chart Expense */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 h-72 flex flex-col">
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 h-64 flex flex-col">
                             <h4 className="font-bold text-slate-700 mb-2 text-sm flex items-center gap-2">
                                 <IconPieChart size={16} className="text-slate-500" /> สัดส่วนค่าใช้จ่าย (Expenses)
                             </h4>
@@ -631,10 +847,13 @@
                                     {expensePieData.map((entry, index) => (
                                         <div key={index} className="flex flex-col">
                                             <div className="flex items-center gap-2 mb-0.5">
-                                                <div className="w-2 h-2 rounded-full" style={{backgroundColor: COLORS.chart[index]}}></div>
+                                                <div className="w-2 h-2 rounded-full" style={{backgroundColor: COLORS.chart[index % COLORS.chart.length]}}></div>
                                                 <span className="text-xs text-slate-500">{entry.name}</span>
                                             </div>
-                                            <span className="text-sm font-bold text-slate-700 pl-4">{((entry.value/results.totalExpenses)*100).toFixed(0)}%</span>
+                                            <div className="pl-4">
+                                                <span className="text-sm font-bold text-slate-700 block leading-tight">{formatCurrency(entry.value)}</span>
+                                                <span className="text-[10px] text-slate-400 font-medium">{((entry.value/results.totalExpenses)*100).toFixed(1)}%</span>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -658,11 +877,11 @@
                             <div className="space-y-3 text-sm relative z-10">
                                 <div className="flex justify-between items-center bg-white/10 p-2 rounded-lg backdrop-blur-sm">
                                     <span className="text-slate-300">ขายบ้าน:</span>
-                                    <span className="font-semibold">{(results.breakEvenPoint / inputs.avgHousePrice).toFixed(2)} หลัง</span>
+                                    <span className="font-semibold">{Math.ceil(results.breakEvenPoint / inputs.avgHousePrice)} หลัง</span>
                                 </div>
                                 <div className="flex justify-between items-center bg-white/10 p-2 rounded-lg backdrop-blur-sm">
                                     <span className="text-slate-300">เช่าบ้าน:</span>
-                                    <span className="font-semibold">{(results.breakEvenPoint / (inputs.avgRentalPrice * inputs.rentalCommMonths)).toFixed(1)} เคส</span>
+                                    <span className="font-semibold">{Math.ceil(results.breakEvenPoint / (inputs.avgRentalPrice * inputs.rentalCommMonths))} เคส</span>
                                 </div>
                             </div>
                         </div>
@@ -690,7 +909,7 @@
                                             <td className="py-2 px-2 text-center">0</td>
                                             <td className="py-2 px-2 text-right text-transparent">-</td>
                                             <td className="py-2 px-2 text-right text-transparent">-</td>
-                                            <td className="py-2 px-3 text-right font-medium">{formatCurrency(inputs.initialCapital - 350000)}</td>
+                                            <td className="py-2 px-3 text-right font-medium">{formatCurrency(results.workingCapital)}</td>
                                         </tr>
                                         {cashFlowData.map((row, index) => (
                                             <tr key={index} className={`hover:bg-slate-50 transition-colors ${row.month === 12 ? 'bg-indigo-50/50' : ''}`}>
